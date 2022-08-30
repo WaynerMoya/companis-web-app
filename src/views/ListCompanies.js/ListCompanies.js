@@ -125,6 +125,7 @@ const ListCompanies = () => {
      */
     const handleClose = () => {
         setIsModalVisible(false)
+        setCompanySelected(null)
         requestGetCompanies()
     }
 
@@ -144,7 +145,7 @@ const ListCompanies = () => {
                 <Table columns={columns} dataSource={companies} pagination={{ pageSize: 5 }} />
 
                 {
-                    companySelected && (
+                    companySelected && isModalVisible && (
                         <ModalCompany isModalVisible={isModalVisible} setIsModalVisible={setIsModalVisible} title="Edit Company" >
                             <FormCompany company={companySelected} method='PUT' handleEvent={handleClose} />
                         </ModalCompany>
