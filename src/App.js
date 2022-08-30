@@ -1,25 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+/* Importing the components from the other files. */
+import ListCompanies from "./pages/ListCompanies.js/ListCompanies";
+import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer";
 
-function App() {
+/**
+ * It returns a div with a Header, ListCompanies, and Footer component
+ * @returns The Header, ListCompanies, and Footer components are being returned.
+ */
+const App = () => {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+
+      <Header />
+
+      <ListCompanies />
+
+      <Footer />
+
     </div>
-  );
+  )
+
 }
 
+
+/* Exporting the App component to be used in other files. */
 export default App;
