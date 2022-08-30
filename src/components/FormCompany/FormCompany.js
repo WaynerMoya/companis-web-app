@@ -1,64 +1,114 @@
-import { useEffect, useState } from "react";
+/* Importing the useEffect hook from the react library. */
+import { useEffect } from "react";
 
+/* Importing the components from the antd library. */
+import { Button, Form, Input, message } from "antd";
 
-
+/* Importing the useHttp hook from the use-http.js file. */
 import useHttp from "../../hooks/use-http";
-import { Button, Form, Input } from "antd";
 
+/* Importing the Loading component from the Loading folder. */
+import Loading from "../Loading/Loading";
+
+/* Importing the css file for the component. */
 import './FormCompany.css'
 
+/* A constant that is used to initialize the form. */
 const initialStateForm = { company_name: '', company_address: '', company_nic: '', company_phone: '' }
 
-const FormCompany = ({ company, method = 'POST' }) => {
+const FormCompany = ({ company, method = 'POST', handleEvent }) => {
 
-    console.log(company)
-
+    /* Destructuring the useHttp hook. */
     const { isLoading, error, requestData } = useHttp()
 
-    const [message, setMessage] = useState(null)
+    /* Initializing the form. */
+    const [form] = Form.useForm()
 
-    const [formCompanyInputValues, setFormCompanyInputValues] = useState(
-        company ? company : initialStateForm)
+    /**
+     * If the company object has a length greater than 0, then set the form's values to the company
+     * object. Otherwise, set the form's values to the initialStateForm object
+     */
+    const fillForm = () => {
+        if (Object.keys(company).length > 0) {
+            console.log(company)
+            form.setFieldsValue(company)
+        } else {
+            form.setFieldsValue(initialStateForm)
+        }
+    }
 
+    /* This is a react hook that is used to run a function when the component is mounted. */
+    useEffect(() => {
+        fillForm()
+    }, [])
+
+    /**
+     * It takes in a data object, checks if the status code is not 200, and if it is not, it displays
+     * an error message. If the status code is 200, it displays a success message, calls the
+     * handleEvent function, and resets the form
+     * @param data - The data returned by the server
+     * @returns the data.
+     */
     const requestCompanyDataProcess = (data) => {
 
-        setMessage(data.message)
-
+        /* Checking if the status code is not 200, and if it is not, it displays an error message. */
         if (data.statusCode !== 200) {
-            // show error
+            message.error(data.message)
             return;
         }
 
-        //setFormCompanyInputValues(initialStateForm)
+        /* Displaying a success message. */
+        message.success(data.message)
+
+        /* A function that is passed as a prop to the FormCompany component. It is used to update the
+        state of the parent component. */
+        handleEvent()
+
+        /* Used to reset the form. */
+        form.resetFields()
     }
 
-    const requestCompany = () => {
+    /**
+     * It takes the values from the form and sends a request to the server with the values
+     * @param values - The values of the form
+     */
+    const requestCompany = (values) => {
 
         requestData({
             path: '/company',
             method: method,
             body: {
-                "id": formCompanyInputValues.company_phone,
-                "company_name": formCompanyInputValues.company_name,
-                "company_address": formCompanyInputValues.company_address,
-                "company_nic": formCompanyInputValues.company_nic,
-                "company_phone": formCompanyInputValues.company_phone
+                "id": values.company_nic,
+                "company_name": values.company_name,
+                "company_address": values.company_address,
+                "company_nic": values.company_nic,
+                "company_phone": values.company_phone
             }
         }, requestCompanyDataProcess)
 
     }
 
-    const handleCreateCompany = (e) => {
-
-        requestCompany()
+    /**
+     * It takes the values from the form and sends them to the requestCompany function
+     * @param values - The values of the form
+     */
+    const handleCreateCompany = (values) => {
+        requestCompany(values)
     }
-
-    const onChangeValueInputs = (e) => setFormCompanyInputValues(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
     return (
         <>
-            {message && <div>{message}</div>}
-            <Form onFinish={handleCreateCompany} onFinishFailed={() => { }} autoComplete="off" layout="vertical">
+
+            {isLoading && < Loading />}
+
+            <Form
+                onFinish={handleCreateCompany}
+                name="control-hooks"
+                form={form}
+                onFinishFailed={() => { }}
+                autoComplete="off"
+                layout="vertical"
+            >
 
                 <Form.Item
                     label="Name Company"
@@ -68,7 +118,7 @@ const FormCompany = ({ company, method = 'POST' }) => {
                         { min: 3, message: 'Please enter a name min 3 characters' }
                     ]}
                     className="input-company">
-                    <Input type="text" name="company_name" defaultValue={formCompanyInputValues?.company_name} onChange={onChangeValueInputs} />
+                    <Input type="text" />
                 </Form.Item>
 
                 <Form.Item
@@ -78,7 +128,7 @@ const FormCompany = ({ company, method = 'POST' }) => {
                         { required: true, message: 'Please input address company' },
                         { min: 3, message: 'Please enter a address min 3 characters' }
                     ]} className="input-company">
-                    <Input type="text" name="company_address" defaultValue={formCompanyInputValues?.company_address} onChange={onChangeValueInputs} />
+                    <Input type="text" />
                 </Form.Item>
 
                 <Form.Item
@@ -86,12 +136,10 @@ const FormCompany = ({ company, method = 'POST' }) => {
                     name="company_nic"
                     rules={[
                         { required: true, message: 'Please input NIC company' },
-                        { min: 10, message: 'Please NIC must be 10 characters' },
-                        { max: 10, message: 'Please NIC must be 10 characters' },
-                        //    { type: 'number', message: 'Please the characters must be numbers' }
+                        { len: 10, message: 'Please NIC must be 10 characters' },
                     ]}
                     className="input-company">
-                    <Input type="number" name="company_nic" defaultValue={formCompanyInputValues?.company_nic} onChange={onChangeValueInputs} />
+                    <Input type="number" disabled={method === 'PUT'} />
                 </Form.Item>
 
                 <Form.Item
@@ -99,12 +147,10 @@ const FormCompany = ({ company, method = 'POST' }) => {
                     name="company_phone"
                     rules={[
                         { required: true, message: 'Please input phone company' },
-                        { min: 10, message: 'Please phone must be 10 characters' },
-                        { max: 10, message: 'Please phone must be 10 characters' },
-                        //{ type: 'number', message: 'Please the characters must be numbers' }
+                        { len: 10, message: 'Please phone must be 10 characters' },
                     ]}
                     className="input-company">
-                    <Input type="number" name="company_phone" defaultValue={formCompanyInputValues?.company_phone} onChange={onChangeValueInputs} />
+                    <Input type="number" />
                 </Form.Item>
 
                 <div className="button-company">
@@ -112,10 +158,10 @@ const FormCompany = ({ company, method = 'POST' }) => {
                         Submit
                     </Button>
                 </div>
-
             </Form>
         </>
     )
 }
 
+/* Exporting the component to be used in other files. */
 export default FormCompany;

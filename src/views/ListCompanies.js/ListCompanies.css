@@ -3,6 +3,11 @@
    margin : auto auto ;
 }
 
+.container-company {
+    height : calc( 100vh - 76px - 102px);
+    overflow : auto;
+}
+
 .create-company-component {
     text-align : end;
 }

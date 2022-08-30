@@ -1,5 +1,5 @@
 /* Importing the components from the other files. */
-import ListCompanies from "./pages/ListCompanies.js/ListCompanies";
+import ListCompanies from "./views/ListCompanies.js/ListCompanies";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 
